@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Animated, SafeAreaView , Text , PanResponder  } from "react-native";
+import { View, Animated, SafeAreaView , Text , PanResponder , Dimensions } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 function Cau1() {
@@ -109,26 +109,30 @@ function Cau1() {
     );
 }
 
+
 function Cau2() {
     const colorAnim = useRef(new Animated.Value(0)).current;
+
     useEffect(() => {
-        Animated.sequence([
-            Animated.timing(colorAnim, {
-                toValue: 1,
-                duration: 3000,
-                useNativeDriver: false,
-            }),
-            Animated.timing(colorAnim, {
-                toValue: 0,
-                duration: 3000,
-                useNativeDriver: false,
-            })
-        ]).start();
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(colorAnim, {
+                    toValue: 1,
+                    duration: 3000,
+                    useNativeDriver: false,
+                }),
+                Animated.timing(colorAnim, {
+                    toValue: 0,
+                    duration: 3000,
+                    useNativeDriver: false,
+                }),
+            ])
+        ).start();
     }, []);
 
     const backgroundColor = colorAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: ['red', 'blue'],
+        inputRange: [0, 0.25, 0.5, 0.75, 1],
+        outputRange: ['red', 'blue', 'yellow', 'orange', 'purple'],
     });
 
     const scaleAnim = colorAnim.interpolate({
@@ -258,12 +262,14 @@ function Cau2() {
 }
 
 
+
 function Cau3() {
     const [circleColor, setCircleColor] = useState("green");
     const initialPosition = useRef({ x: 0, y: 0 }); 
-    const pan = useRef(new Animated.ValueXY()).current; 
+    const pan = useRef(new Animated.ValueXY()).current;
 
-    const [isVisible, setIsVisible] = useState(true); // To track visibility of the second circle
+    const screenHeight = Dimensions.get("window").height;
+    const rectHeight = 200; // Chiều cao của hình chữ nhật
 
     const panResponder = useRef(
         PanResponder.create({
@@ -279,69 +285,77 @@ function Cau3() {
                     toValue: { x: initialPosition.current.x, y: initialPosition.current.y },
                     useNativeDriver: true,
                 }).start();
-                setCircleColor("red");
+                setCircleColor("red"); 
             },
         })
     ).current;
 
-    // Second circle - follow drag movement and disappear when moved above half of the screen
-    const secondCirclePan = useRef(new Animated.ValueXY()).current;
-    const secondCirclePosition = useRef({ x: 0, y: 400 }); // Initial position at the bottom half
+    // Tạo panResponder cho hình chữ nhật
+    const rectPan = useRef(new Animated.ValueXY()).current;
 
-    const secondCirclePanResponder = useRef(
+    const rectPanResponder = useRef(
         PanResponder.create({
             onStartShouldSetPanResponder: () => true,
-            onPanResponderGrant: () => {},
+            onPanResponderGrant: (_, gestureState) => {
+                initialPosition.current = { x: gestureState.moveX, y: gestureState.moveY };
+            },
             onPanResponderMove: (_, gestureState) => {
-                secondCirclePan.setValue({ x: gestureState.moveX, y: gestureState.moveY });
+                rectPan.setValue({ x: 0, y: gestureState.moveY });
             },
             onPanResponderRelease: (_, gestureState) => {
-                const { moveY } = gestureState;
-
-                // If the circle moves above the middle of the screen, make it disappear
-                if (moveY < 200) {
-                    setIsVisible(false);
-                    setTimeout(() => {
-                        // After 1 second, reset visibility and position
-                        setIsVisible(true);
-                        secondCirclePan.setValue({ x: secondCirclePosition.current.x, y: secondCirclePosition.current.y });
-                    }, 1000);
+                const currentY = gestureState.moveY;
+                
+                if (currentY < screenHeight / 2) {
+                    // Nếu kéo lên quá nửa màn hình, ẩn đi và sau 1s trở lại
+                    Animated.timing(rectPan, {
+                        toValue: { x: 0, y: screenHeight }, // Đưa nó xuống ngoài màn hình
+                        duration: 500,
+                        useNativeDriver: true,
+                    }).start(() => {
+                        // Sau khi ẩn, trở lại vị trí ban đầu sau 1 giây
+                        setTimeout(() => {
+                            rectPan.setValue({ x: 0, y: screenHeight - rectHeight });
+                        }, 1000);
+                    });
+                } else {
+                    // Nếu không, kéo về vị trí ban đầu
+                    Animated.spring(rectPan, {
+                        toValue: { x: 0, y: screenHeight - rectHeight },
+                        useNativeDriver: true,
+                    }).start();
                 }
             },
         })
     ).current;
 
     return (
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-
-            {/* First circle */}
+        <View style={{ flex: 1 , justifyContent:'center' , alignContent:'center'}}>
+            {/* Hình tròn */}
             <Animated.View
-                {...panResponder.panHandlers} 
+                {...panResponder.panHandlers}
                 style={{
                     width: 100,
                     height: 100,
                     borderRadius: 50,
                     backgroundColor: circleColor,
-                    position: "absolute", 
+                    position: "absolute",
+                    top: 100,
                     transform: [{ translateX: pan.x }, { translateY: pan.y }],
                 }}
             />
             
-            {/* Second circle at bottom half */}
-            {isVisible && (
-                <Animated.View
-                    {...secondCirclePanResponder.panHandlers}
-                    style={{
-                        width: 100,
-                        height: 100,
-                        borderRadius: 50,
-                        backgroundColor: "blue",
-                        position: "absolute",
-                        bottom: 150, // Initially at the bottom half
-                        transform: [{ translateX: secondCirclePan.x }, { translateY: secondCirclePan.y }],
-                    }}
-                />
-            )}
+            {/* Hình chữ nhật */}
+            <Animated.View
+                {...rectPanResponder.panHandlers}
+                style={{
+                    width: "100%",
+                    height: rectHeight,
+                    backgroundColor: 'blue',
+                    position: 'absolute',
+                    bottom: 0,
+                    transform: [{ translateY: rectPan.y }],
+                }}
+            />
         </View>
     );
 }
