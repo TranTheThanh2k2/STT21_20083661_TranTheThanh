@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from "react";
-import { View, Animated, SafeAreaView } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { View, Animated, SafeAreaView , Text , PanResponder  } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 function Cau1() {
@@ -111,7 +111,7 @@ function Cau1() {
 
 function Cau2() {
     const colorAnim = useRef(new Animated.Value(0)).current;
-    
+
     useEffect(() => {
         Animated.loop(
             Animated.timing(colorAnim, {
@@ -127,22 +127,81 @@ function Cau2() {
         outputRange: ['red', 'blue', 'yellow', 'orange', 'purple', 'red'], 
     });
 
+    const moveAnim = useRef(new Animated.Value(0)).current;
+    useEffect(() => {
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(moveAnim, {
+                    toValue: 100,
+                    duration: 1000,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(moveAnim, {
+                    toValue: 0,
+                    duration: 1000,
+                    useNativeDriver: true,
+                }),
+            ])
+        ).start();
+    }, []);
+
+    const fadeAnim = useRef(new Animated.Value(1)).current;
+
+    useEffect(() => {
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(fadeAnim, {
+                    toValue: 0,
+                    duration: 1000,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(fadeAnim, {
+                    toValue: 1,
+                    duration: 1000,
+                    useNativeDriver: true,
+                }),
+            ])
+        ).start();
+    }, []);
+
     
     return (
-        <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-              <Animated.View
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+            <Animated.View
                 style={{
                     width: 100,
                     height: 100,
                     borderRadius: 50,
-                    backgroundColor: backgroundColor,
+                    backgroundColor: backgroundColor, 
+                    marginBottom: 30,
                 }}
             />
-        </SafeAreaView>
+            <Animated.View
+                style={{
+                    width: 50,
+                    height: 50,
+                    backgroundColor: "green",
+                    position: "absolute",
+                    bottom: 150,
+                    transform: [{ translateY: moveAnim }],
+                }}
+            />
+            <Animated.View
+                style={{
+                    width: 30,
+                    height: 30,
+                    borderRadius: 15,
+                    backgroundColor: "pink",
+                    position: "absolute",
+                    bottom: 50,
+                    opacity: fadeAnim, 
+                }}
+            />
+        </View>
     );
 }
 
-// Tab Navigation
+
 const Tab = createBottomTabNavigator();
 
 export default function App() {
@@ -150,6 +209,7 @@ export default function App() {
             <Tab.Navigator>
                 <Tab.Screen name="Câu 1" component={Cau1} />
                 <Tab.Screen name="Câu 2" component={Cau2} />
+                {/* <Tab.Screen name="Câu 3" component={Cau3} /> */}
             </Tab.Navigator>
     );
 }
