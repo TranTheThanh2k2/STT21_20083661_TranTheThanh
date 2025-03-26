@@ -131,8 +131,8 @@ function Cau2() {
     }, []);
 
     const backgroundColor = colorAnim.interpolate({
-        inputRange: [0, 0.25, 0.5, 0.75, 1],
-        outputRange: ['red', 'blue', 'yellow', 'orange', 'purple'],
+        inputRange: [0, 0.2, 0.4, 0.6, 0.8, 1],
+        outputRange: ['red', 'blue', 'yellow', 'orange', 'purple' ,'red'],
     });
 
     const scaleAnim = colorAnim.interpolate({
@@ -269,7 +269,7 @@ function Cau3() {
     const pan = useRef(new Animated.ValueXY()).current;
 
     const screenHeight = Dimensions.get("window").height;
-    const rectHeight = 200; // Chiều cao của hình chữ nhật
+    const rectHeight = 200;
 
     const panResponder = useRef(
         PanResponder.create({
@@ -290,7 +290,6 @@ function Cau3() {
         })
     ).current;
 
-    // Tạo panResponder cho hình chữ nhật
     const rectPan = useRef(new Animated.ValueXY()).current;
 
     const rectPanResponder = useRef(
@@ -306,19 +305,16 @@ function Cau3() {
                 const currentY = gestureState.moveY;
                 
                 if (currentY < screenHeight / 2) {
-                    // Nếu kéo lên quá nửa màn hình, ẩn đi và sau 1s trở lại
                     Animated.timing(rectPan, {
-                        toValue: { x: 0, y: screenHeight }, // Đưa nó xuống ngoài màn hình
+                        toValue: { x: 0, y: screenHeight },
                         duration: 500,
                         useNativeDriver: true,
                     }).start(() => {
-                        // Sau khi ẩn, trở lại vị trí ban đầu sau 1 giây
                         setTimeout(() => {
                             rectPan.setValue({ x: 0, y: screenHeight - rectHeight });
                         }, 1000);
                     });
                 } else {
-                    // Nếu không, kéo về vị trí ban đầu
                     Animated.spring(rectPan, {
                         toValue: { x: 0, y: screenHeight - rectHeight },
                         useNativeDriver: true,
@@ -329,7 +325,7 @@ function Cau3() {
     ).current;
 
     return (
-        <View style={{ flex: 1 , justifyContent:'center' , alignContent:'center'}}>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>  
             {/* Hình tròn */}
             <Animated.View
                 {...panResponder.panHandlers}
