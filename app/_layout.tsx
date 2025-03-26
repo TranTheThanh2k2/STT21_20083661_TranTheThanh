@@ -21,6 +21,8 @@ export default function App() {
         ).start();
     }, []);
 
+
+    // animations cho hình tròn 
     const circleX = useRef(new Animated.Value(200)).current;
 
     useEffect(() => {
@@ -40,6 +42,35 @@ export default function App() {
         ).start();
     }, []);
 
+
+    // animations cho hình vuông (câu 1c)
+    const animatedValue = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.loop(
+            Animated.timing(animatedValue, {
+                toValue: 1,
+                duration: 5000,
+                useNativeDriver: true,
+            })
+        ).start();
+    }, []);
+
+    const translateX = animatedValue.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, 100],
+    });
+
+    const translateY = animatedValue.interpolate({
+        inputRange: [0, 0.5, 1],
+        outputRange: [0, -50, 0],
+    });
+
+    const rotate = animatedValue.interpolate({
+        inputRange: [0, 1],
+        outputRange: ["0deg", "360deg"],
+    });
+
     return (
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
             <Animated.Text
@@ -53,6 +84,7 @@ export default function App() {
                 Chào các bạn đã đến IUH!
             </Animated.Text>
 
+            {/* giao diện cho hình tròn */}
             <Animated.View
                 style={{
                     width: 50,
@@ -62,6 +94,18 @@ export default function App() {
                     position: "absolute",
                     bottom: 200,
                     transform: [{ translateX: circleX }],
+                }}
+            />
+
+            {/* giao diện cho hình vuông  */}
+            <Animated.View
+                style={{
+                    width: 50,
+                    height: 50,
+                    bottom: 50,
+                    backgroundColor: "red",
+                    position: "absolute",
+                    transform: [{ translateX }, { translateY }, { rotate }],
                 }}
             />
         </View>
