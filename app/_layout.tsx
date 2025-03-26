@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from "react";
-import { View, Animated } from "react-native";
+import { View, Animated, SafeAreaView } from "react-native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
-export default function App() {
+function Cau1() {
     const textX = useRef(new Animated.Value(-150)).current;
 
     useEffect(() => {
@@ -21,8 +22,6 @@ export default function App() {
         ).start();
     }, []);
 
-
-    // animations cho hình tròn 
     const circleX = useRef(new Animated.Value(200)).current;
 
     useEffect(() => {
@@ -42,8 +41,6 @@ export default function App() {
         ).start();
     }, []);
 
-
-    // animations cho hình vuông (câu 1c)
     const animatedValue = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
@@ -72,7 +69,7 @@ export default function App() {
     });
 
     return (
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
             <Animated.Text
                 style={{
                     marginBottom: 50,
@@ -97,7 +94,7 @@ export default function App() {
                 }}
             />
 
-            {/* giao diện cho hình vuông  */}
+            {/* giao diện cho hình vuông */}
             <Animated.View
                 style={{
                     width: 50,
@@ -108,6 +105,51 @@ export default function App() {
                     transform: [{ translateX }, { translateY }, { rotate }],
                 }}
             />
-        </View>
+        </SafeAreaView>
+    );
+}
+
+function Cau2() {
+    const colorAnim = useRef(new Animated.Value(0)).current;
+    
+    useEffect(() => {
+        Animated.loop(
+            Animated.timing(colorAnim, {
+                toValue: 1,
+                duration: 3000,
+                useNativeDriver: false, 
+            })
+        ).start();
+    }, []);
+
+    const backgroundColor = colorAnim.interpolate({
+        inputRange: [0, 0.2, 0.4, 0.6, 0.8, 1], 
+        outputRange: ['red', 'blue', 'yellow', 'orange', 'purple', 'red'], 
+    });
+
+    
+    return (
+        <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+              <Animated.View
+                style={{
+                    width: 100,
+                    height: 100,
+                    borderRadius: 50,
+                    backgroundColor: backgroundColor,
+                }}
+            />
+        </SafeAreaView>
+    );
+}
+
+// Tab Navigation
+const Tab = createBottomTabNavigator();
+
+export default function App() {
+    return (
+            <Tab.Navigator>
+                <Tab.Screen name="Câu 1" component={Cau1} />
+                <Tab.Screen name="Câu 2" component={Cau2} />
+            </Tab.Navigator>
     );
 }
